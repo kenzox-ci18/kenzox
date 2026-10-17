@@ -11,8 +11,9 @@ const isLocalStatic =
   location.protocol === "file:" ||
   (["localhost", "127.0.0.1"].includes(location.hostname) &&
     location.port !== "5000");
-const API_BASE = isLocalStatic ? "http://localhost:5000" : "";
-
+const API_BASE = isLocalStatic
+  ? "http://localhost:5000"
+  : "https://kenzox.onrender.com";
 let currentProfile = null;
 let profileModal = null;
 
