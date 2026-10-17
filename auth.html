@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KENZOX — Kirish</title>
+  <title>KENZOX вЂ” Kirish</title>
   <style>
     * {
       box-sizing: border-box;
@@ -146,14 +146,14 @@
 
     <div class="tabs">
       <button type="button" id="loginTab" class="active">Kirish</button>
-      <button type="button" id="signupTab">Ro‘yxatdan o‘tish</button>
+      <button type="button" id="signupTab">RoвЂyxatdan oвЂtish</button>
     </div>
 
     <form id="authForm">
       <div id="nameField" hidden>
         <label for="displayName">Ismingiz (ixtiyoriy)</label>
         <input id="displayName" type="text" maxlength="80"
-          autocomplete="name" placeholder="Bo‘sh qoldirsangiz, username ishlatiladi">
+          autocomplete="name" placeholder="BoвЂsh qoldirsangiz, username ishlatiladi">
       </div>
 
       <label for="username">Username</label>
@@ -172,7 +172,7 @@
 
     <p class="hint">
       Username faqat ingliz harflari, raqamlar va pastki chiziqdan
-      iborat bo‘lishi mumkin.
+      iborat boвЂlishi mumkin.
     </p>
   </main>
 
@@ -194,7 +194,7 @@
       location.protocol === "file:" ||
       (["localhost", "127.0.0.1"].includes(location.hostname) &&
         location.port !== "5000");
-    const API_BASE = isLocalStatic ? "http://localhost:5000" : "";
+    const API_BASE = isLocalStatic ? "http://localhost:5000" : "https://kenzox.onrender.com";
 
     const form = document.querySelector("#authForm");
     const loginTab = document.querySelector("#loginTab");
@@ -232,11 +232,11 @@
         : "Xush kelibsiz!";
 
       subtitle.textContent = signup
-        ? "KENZOX’da yangi akkaunt yarating"
+        ? "KENZOXвЂ™da yangi akkaunt yarating"
         : "Akkauntingizga kiring";
 
       submitBtn.textContent = signup
-        ? "Ro‘yxatdan o‘tish"
+        ? "RoвЂyxatdan oвЂtish"
         : "Kirish";
 
       showStatus("");
@@ -253,12 +253,12 @@
       const name = displayName.value.trim();
 
       if (!/^[a-z0-9_]{3,24}$/.test(username)) {
-        showStatus("Username 3–24 ta harf, raqam yoki _ dan iborat bo‘lsin.");
+        showStatus("Username 3вЂ“24 ta harf, raqam yoki _ dan iborat boвЂlsin.");
         return;
       }
 
       if (password.length < 8 || password.length > 72) {
-        showStatus("Parol 8–72 ta belgidan iborat bo‘lishi kerak.");
+        showStatus("Parol 8вЂ“72 ta belgidan iborat boвЂlishi kerak.");
         return;
       }
 
@@ -296,7 +296,7 @@
           result = JSON.parse(responseText);
         } catch {
           throw new Error(
-            `Server JSON qaytarmadi. HTTP holati: ${response.status}. Javob: ${responseText.slice(0, 200) || "(bo‘sh javob)"}`
+            `Server JSON qaytarmadi. HTTP holati: ${response.status}. Javob: ${responseText.slice(0, 200) || "(boвЂsh javob)"}`
           );
         }
 
@@ -310,7 +310,7 @@
           !result.session?.access_token ||
           !result.session?.refresh_token
         ) {
-          throw new Error("Sessiya olinmadi. Qayta urinib ko‘ring.");
+          throw new Error("Sessiya olinmadi. Qayta urinib koвЂring.");
         }
 
         const { error } = await supabase.auth.setSession({
@@ -327,7 +327,7 @@
 
         showStatus(
           /failed to fetch|networkerror/i.test(error.message || "")
-            ? "Serverga ulanib bo‘lmadi. Terminalda node server.js ishlayotganini tekshiring."
+            ? "Serverga ulanib boвЂlmadi. Terminalda node server.js ishlayotganini tekshiring."
             : error.message || "Xatolik yuz berdi."
         );
       } finally {
