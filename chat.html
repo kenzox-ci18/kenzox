@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KENZOX — Chat</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;background:#080b14;color:#fff;height:100vh;display:grid;place-items:center}
+    .app{width:min(100%,1000px);height:min(92vh,750px);display:grid;grid-template-columns:300px 1fr;background:#111626;border:1px solid #252b40;border-radius:18px;overflow:hidden}
+    aside{padding:20px;border-right:1px solid #252b40;display:flex;flex-direction:column;gap:14px}
+    h1{letter-spacing:3px;color:#a99aff}
+    .muted{color:#98a3bb;font-size:13px}
+    input,button{width:100%;padding:12px;border-radius:9px;border:1px solid #303951;background:#090e1b;color:#fff}
+    button{background:#7357ff;border:none;font-weight:bold;cursor:pointer}
+    button:disabled{opacity:.5}
+    main{display:flex;flex-direction:column;min-width:0}
+    header{padding:20px;border-bottom:1px solid #252b40}
+    #messages{padding:18px;flex:1;overflow:auto;display:flex;flex-direction:column;gap:12px}
+    .bubble{padding:11px 14px;background:#252b40;border-radius:12px;max-width:80%;overflow-wrap:anywhere}
+    .mine{background:#6247e8;align-self:flex-end}
+    .time{font-size:11px;color:#c4c9d8;margin-top:6px}
+    form{display:flex;gap:8px;padding:14px;border-top:1px solid #252b40}
+    form input{flex:1;min-width:0}
+    form button{width:100px}
+    #status{font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+    @media(max-width:650px){.app{height:100vh;border-radius:0;grid-template-columns:1fr;grid-template-rows:auto 1fr}aside{padding:12px;gap:8px;border-right:0;border-bottom:1px solid #252b40}aside h1{font-size:20px}aside .muted{display:none}main{min-height:0}header{padding:12px}#messages{padding:12px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <h1>KENZOX</h1>
+    <div class="muted">Real-time messenger</div>
+    <div id="myEmail" class="muted">Hisob tekshirilmoqda...</div>
+    <input id="receiver" type="email" placeholder="Suhbatdosh UUID si">
+    <button id="openChat">Chatni ochish</button>
+    <button id="logout" style="background:#252b40">Hisobdan chiqish</button>
+    <div id="status">Yuklanmoqda...</div>
+  </aside>
+  <main>
+    <header>
+      <strong id="chatTitle">Suhbatni tanlang</strong>
+      <div class="muted" id="chatSubtitle">Xabar almashishni boshlang</div>
+    </header>
+    <section id="messages"></section>
+    <form id="sendForm">
+      <input id="content" maxlength="5000" placeholder="Xabar yozing..." autocomplete="off" required>
+      <button id="sendBtn" type="submit">Yuborish</button>
+    </form>
+  </main>
+</div>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+const SUPABASE_URL = "https://jzdwgnylusvsstratrty.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_DoMuWxjz9KSWX-SPkIqQXw_P_TyJMpM";
+const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+const myEmail = document.getElementById("myEmail");
+const receiverInput = document.getElementById("receiver");
+const openChatBtn = document.getElementById("openChat");
+const logoutBtn = document.getElementById("logout");
+const status = document.getElementById("status");
+const messages = document.getElementById("messages");
+const chatTitle = document.getElementById("chatTitle");
+const chatSubtitle = document.getElementById("chatSubtitle");
+const sendForm = document.getElementById("sendForm");
+const contentInput = document.getElementById("content");
+const sendBtn = document.getElementById("sendBtn");
+
+let currentUser = null;
+let receiverId = null;
+let channel = null;
+
+function showStatus(text) {
+  status.textContent = text;
+}
+
+function addMessage(message) {
+  if (document.querySelector(`[data-message-id="${message.id}"]`)) return;
+
+  const bubble = document.createElement("article");
+  bubble.className = "bubble" + (message.sender_id === currentUser.id ? " mine" : "");
+  bubble.dataset.messageId = message.id;
+
+  const body = document.createElement("div");
+  body.textContent = message.content;
+
+  const time = document.createElement("div");
+  time.className = "time";
+  time.textContent = new Date(message.created_at).toLocaleString();
+
+  bubble.append(body, time);
+  messages.appendChild(bubble);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+async function start() {
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data.user) {
+    showStatus("Avval hisobga kiring.");
+    myEmail.textContent = "Login talab qilinadi";
+    openChatBtn.disabled = true;
+    sendBtn.disabled = true;
+    return;
+  }
+
+  currentUser = data.user;
+  myEmail.textContent = currentUser.email;
+  showStatus("Hisobga kirdingiz. Suhbatdosh emailini kiriting.");
+}
+
+async function openChat() {
+  if (!currentUser) return;
+
+  const email = receiverInput.value.trim().toLowerCase();
+  if (!email || email === currentUser.email?.toLowerCase()) {
+    showStatus("Boshqa foydalanuvchining emailini kiriting.");
+    return;
+  }
+
+  showStatus("Foydalanuvchi qidirilmoqda...");
+  messages.replaceChildren();
+
+  // Supabase Auth foydalanuvchilarining emailini browserdan qidirib bo‘lmaydi.
+  // Shu sababli bu demo chatda suhbatdoshning UUID sini kiritish talab qilinadi.
+  const { data: uuidCheck, error: uuidError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", email)
+    .maybeSingle();
+
+  if (uuidError) {
+    showStatus("Profilni o‘qib bo‘lmadi: " + uuidError.message);
+    return;
+  }
+
+  if (!uuidCheck) {
+    showStatus("Email orqali foydalanuvchi qidirish hali ulanmagan. Hozircha suhbatdosh UUID si kerak.");
+    return;
+  }
+
+  receiverId = uuidCheck.id;
+  chatTitle.textContent = "KENZOX suhbat";
+  chatSubtitle.textContent = "Xabarlar real vaqtda yangilanadi";
+
+  if (channel) await supabase.removeChannel(channel);
+
+  const { data, error } = await supabase
+    .from("messages")
+    .select("*")
+    .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${currentUser.id})`)
+    .order("created_at", { ascending: true })
+    .limit(100);
+
+  if (error) {
+    showStatus("Xabarlarni yuklash xatosi: " + error.message);
+    return;
+  }
+
+  data.forEach(addMessage);
+
+  channel = supabase
+    .channel("chat-" + [currentUser.id, receiverId].sort().join("-"))
+    .on("postgres_changes", {
+      event: "INSERT",
+      schema: "public",
+      table: "messages"
+    }, payload => {
+      const message = payload.new;
+      const isThisChat =
+        (message.sender_id === currentUser.id && message.receiver_id === receiverId) ||
+        (message.sender_id === receiverId && message.receiver_id === currentUser.id);
+
+      if (isThisChat) addMessage(message);
+    })
+    .subscribe();
+
+  showStatus("Chat tayyor. Xabar yuborishingiz mumkin.");
+  sendBtn.disabled = false;
+}
+
+sendForm.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (!currentUser || !receiverId) {
+    showStatus("Avval suhbatni oching.");
+    return;
+  }
+
+  const content = contentInput.value.trim();
+  if (!content) return;
+
+  sendBtn.disabled = true;
+
+  const { data, error } = await supabase
+    .from("messages")
+    .insert({
+      sender_id: currentUser.id,
+      receiver_id: receiverId,
+      content
+    })
+    .select()
+    .single();
+
+  if (error) {
+    showStatus("Xabar yuborilmadi: " + error.message);
+  } else {
+    addMessage(data);
+    contentInput.value = "";
+    showStatus("Xabar yuborildi.");
+  }
+
+  sendBtn.disabled = false;
+  contentInput.focus();
+});
+
+openChatBtn.addEventListener("click", openChat);
+
+logoutBtn.addEventListener("click", async () => {
+  await supabase.auth.signOut();
+  window.location.href = "auth.html";
+});
+
+start();
+</script>
+</body>
+</html>

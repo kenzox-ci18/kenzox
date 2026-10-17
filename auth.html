@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KENZOX — Kirish</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: #080910;
+      color: #f5f5ff;
+      font-family: Arial, sans-serif;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      padding: 32px;
+      background: #121420;
+      border: 1px solid #292c40;
+      border-radius: 22px;
+      box-shadow: 0 20px 70px #0008;
+    }
+
+    .logo {
+      margin-bottom: 10px;
+      color: #a78bfa;
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+      text-align: center;
+      font-size: 25px;
+    }
+
+    .subtitle {
+      margin-bottom: 24px;
+      color: #999db2;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 22px;
+      padding: 5px;
+      background: #090b13;
+      border-radius: 12px;
+    }
+
+    .tabs button {
+      padding: 12px 6px;
+      border: 0;
+      border-radius: 9px;
+      color: #a6a8bb;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .tabs button.active {
+      background: #8b5cf6;
+      color: white;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 8px;
+      font-size: 13px;
+      color: #d4d5e3;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid #303349;
+      border-radius: 10px;
+      outline: none;
+      background: #0b0d16;
+      color: white;
+      font-size: 15px;
+    }
+
+    input:focus {
+      border-color: #a78bfa;
+    }
+
+    .submit {
+      width: 100%;
+      margin-top: 22px;
+      padding: 14px;
+      border: 0;
+      border-radius: 10px;
+      background: #8b5cf6;
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .submit:disabled {
+      opacity: .6;
+      cursor: wait;
+    }
+
+    #status {
+      min-height: 20px;
+      margin-top: 16px;
+      color: #ff9caa;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .hint {
+      margin-top: 15px;
+      color: #777d95;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="logo">KENZOX</div>
+    <h1 id="heading">Xush kelibsiz!</h1>
+    <p class="subtitle" id="subtitle">Akkauntingizga kiring</p>
+
+    <div class="tabs">
+      <button type="button" id="loginTab" class="active">Kirish</button>
+      <button type="button" id="signupTab">Ro‘yxatdan o‘tish</button>
+    </div>
+
+    <form id="authForm">
+      <div id="nameField" hidden>
+        <label for="displayName">Ismingiz (ixtiyoriy)</label>
+        <input id="displayName" type="text" maxlength="80"
+          autocomplete="name" placeholder="Bo‘sh qoldirsangiz, username ishlatiladi">
+      </div>
+
+      <label for="username">Username</label>
+      <input id="username" type="text" minlength="3" maxlength="24"
+        pattern="[A-Za-z0-9_]{3,24}" autocomplete="username"
+        placeholder="masalan, mustafo_01" required>
+
+      <label for="password">Parol</label>
+      <input id="password" type="password" minlength="8" maxlength="72"
+        autocomplete="current-password" placeholder="Kamida 8 ta belgi"
+        required>
+
+      <button class="submit" id="submitBtn" type="submit">Kirish</button>
+      <p id="status" role="status" aria-live="polite"></p>
+    </form>
+
+    <p class="hint">
+      Username faqat ingliz harflari, raqamlar va pastki chiziqdan
+      iborat bo‘lishi mumkin.
+    </p>
+  </main>
+
+  <script type="module">
+    import { createClient } from
+      "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://jzdwgnylusvsstratrty.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_DoMuWxjz9KSWX-SPkIqQXw_P_TyJMpM";
+
+    const supabase = createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
+    // Sahifa Live Server (5500, 5501, 5502...) orqali ochilsa ham,
+    // so'rovlar KENZOX serveriga (localhost:5000) boradi.
+    const isLocalStatic =
+      location.protocol === "file:" ||
+      (["localhost", "127.0.0.1"].includes(location.hostname) &&
+        location.port !== "5000");
+    const API_BASE = isLocalStatic ? "http://localhost:5000" : "";
+
+    const form = document.querySelector("#authForm");
+    const loginTab = document.querySelector("#loginTab");
+    const signupTab = document.querySelector("#signupTab");
+    const nameField = document.querySelector("#nameField");
+    const displayName = document.querySelector("#displayName");
+    const usernameInput = document.querySelector("#username");
+    const passwordInput = document.querySelector("#password");
+    const submitBtn = document.querySelector("#submitBtn");
+    const heading = document.querySelector("#heading");
+    const subtitle = document.querySelector("#subtitle");
+    const status = document.querySelector("#status");
+
+    let mode = "login";
+
+    function showStatus(message, success = false) {
+      status.textContent = message;
+      status.style.color = success ? "#72e6a2" : "#ff9caa";
+    }
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      const signup = mode === "signup";
+
+      nameField.hidden = !signup;
+      passwordInput.autocomplete = signup
+        ? "new-password"
+        : "current-password";
+
+      loginTab.classList.toggle("active", !signup);
+      signupTab.classList.toggle("active", signup);
+
+      heading.textContent = signup
+        ? "Yangi akkaunt"
+        : "Xush kelibsiz!";
+
+      subtitle.textContent = signup
+        ? "KENZOX’da yangi akkaunt yarating"
+        : "Akkauntingizga kiring";
+
+      submitBtn.textContent = signup
+        ? "Ro‘yxatdan o‘tish"
+        : "Kirish";
+
+      showStatus("");
+    }
+
+    loginTab.addEventListener("click", () => setMode("login"));
+    signupTab.addEventListener("click", () => setMode("signup"));
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const username = usernameInput.value.trim().toLowerCase();
+      const password = passwordInput.value;
+      const name = displayName.value.trim();
+
+      if (!/^[a-z0-9_]{3,24}$/.test(username)) {
+        showStatus("Username 3–24 ta harf, raqam yoki _ dan iborat bo‘lsin.");
+        return;
+      }
+
+      if (password.length < 8 || password.length > 72) {
+        showStatus("Parol 8–72 ta belgidan iborat bo‘lishi kerak.");
+        return;
+      }
+
+      if (mode === "signup" && name.length > 80) {
+        showStatus("Ism 80 belgidan oshmasin.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      showStatus("Tekshirilmoqda...", true);
+
+      try {
+        const response = await fetch(
+          API_BASE +
+            (mode === "signup"
+              ? "/api/auth/signup"
+              : "/api/auth/login"),
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              username,
+              password,
+              name
+            })
+          }
+        );
+
+        const responseText = await response.text();
+        let result;
+
+        try {
+          result = JSON.parse(responseText);
+        } catch {
+          throw new Error(
+            `Server JSON qaytarmadi. HTTP holati: ${response.status}. Javob: ${responseText.slice(0, 200) || "(bo‘sh javob)"}`
+          );
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            result.error || `Server xatosi: ${response.status}`
+          );
+        }
+
+        if (
+          !result.session?.access_token ||
+          !result.session?.refresh_token
+        ) {
+          throw new Error("Sessiya olinmadi. Qayta urinib ko‘ring.");
+        }
+
+        const { error } = await supabase.auth.setSession({
+          access_token: result.session.access_token,
+          refresh_token: result.session.refresh_token
+        });
+
+        if (error) throw error;
+
+        showStatus("Muvaffaqiyatli! Sayt ochilmoqda...", true);
+        window.location.replace("./index.html");
+      } catch (error) {
+        console.error("KENZOX AUTH:", error);
+
+        showStatus(
+          /failed to fetch|networkerror/i.test(error.message || "")
+            ? "Serverga ulanib bo‘lmadi. Terminalda node server.js ishlayotganini tekshiring."
+            : error.message || "Xatolik yuz berdi."
+        );
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

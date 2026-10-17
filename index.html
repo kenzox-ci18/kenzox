@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#11151f">
+  <title>KENZOX — Messenger</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="app" id="app">
+
+    <aside class="sidebar">
+      <div class="side-top">
+        <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Menyu">☰</button>
+
+        <a class="brand" href="./index.html">
+          <span class="brand-logo">K</span>
+          <span>KENZOX</span>
+        </a>
+
+        <button class="icon-btn" id="themeBtn" type="button" aria-label="Mavzuni almashtirish">☾</button>
+      </div>
+
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input id="searchInput" type="search" placeholder="Foydalanuvchi qidirish..." autocomplete="off">
+        <kbd>Ctrl K</kbd>
+      </div>
+
+      <div class="filter-row">
+        <button class="filter active" type="button" data-filter="all">Barchasi</button>
+        <button class="filter" type="button" data-filter="unread">O‘qilmagan</button>
+        <button class="filter" type="button" data-filter="groups">Guruhlar</button>
+      </div>
+
+      <div class="section-label">
+        <span>FOYDALANUVCHILAR</span>
+        <button class="tiny-btn" id="newChatBtn" type="button" title="Yangi suhbat">＋</button>
+      </div>
+
+      <div class="chat-list" id="chatList"></div>
+
+      <div class="sidebar-bottom">
+        <button class="my-profile" id="profileBtn" type="button">
+          <span class="avatar avatar-me" id="myAvatar">
+            K<span class="online-dot"></span>
+          </span>
+
+          <span class="profile-text">
+            <strong id="myName">KENZOX foydalanuvchisi</strong>
+            <small id="myUsername">Profil yuklanmoqda...</small>
+          </span>
+
+          <span class="more-dots">•••</span>
+        </button>
+
+        <div class="sidebar-footer">
+          <span class="status-dot"></span>
+          KENZOX messenger
+          <span class="version">v1.0</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="conversation" id="conversation">
+      <header class="chat-header">
+        <button class="icon-btn mobile-back" id="backBtn" type="button" aria-label="Chatlar">‹</button>
+
+        <div class="header-person">
+          <div class="avatar avatar-large" id="headerAvatar">K</div>
+
+          <div class="header-info">
+            <h2 id="headerName">Suhbatni tanlang</h2>
+            <p id="headerStatus">KENZOX messenger</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button class="icon-btn" id="searchChatBtn" type="button" title="Suhbat ichidan qidirish">⌕</button>
+          <button class="icon-btn" id="callBtn" type="button" title="Qo‘ng‘iroq">♧</button>
+          <button class="icon-btn" id="infoBtn" type="button" title="Ma’lumot">ⓘ</button>
+          <button class="icon-btn" id="logoutBtn" type="button" title="Tizimdan chiqish">↪</button>
+        </div>
+      </header>
+
+      <div class="chat-search hidden" id="chatSearch">
+        <input id="chatSearchInput" type="search" placeholder="Ushbu suhbatdan qidirish...">
+        <button class="icon-btn" id="closeSearchBtn" type="button" aria-label="Qidiruvni yopish">✕</button>
+      </div>
+
+      <section class="messages-area" id="messagesArea">
+        <div class="date-divider">
+          <span>KENZOX</span>
+        </div>
+
+        <div class="messages" id="messages">
+          <div class="empty-state">
+            <p>💬</p>
+            <h3>Suhbatni tanlang</h3>
+            <span>Chap tomondan foydalanuvchini tanlang yoki yangi suhbat boshlang.</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="typing hidden" id="typingIndicator">
+        <span></span>
+        <span></span>
+        <span></span>
+        <small>yozmoqda...</small>
+      </div>
+
+      <form class="composer" id="messageForm">
+        <button class="icon-btn attach-btn" type="button" id="attachBtn" title="Fayl biriktirish">＋</button>
+
+        <input type="file" id="fileInput" hidden>
+
+        <button class="icon-btn emoji-btn" type="button" id="emojiBtn" title="Emoji">☺</button>
+
+        <input
+          id="messageInput"
+          type="text"
+          maxlength="5000"
+          placeholder="Xabar yozing..."
+          autocomplete="off"
+          disabled
+        >
+
+        <button class="icon-btn composer-mic" type="button" id="micBtn" title="Ovozli xabar">♬</button>
+
+        <button class="send-btn" type="submit" aria-label="Yuborish" disabled>
+          <span>➤</span>
+        </button>
+
+        <div class="emoji-picker hidden" id="emojiPicker">
+          <button type="button">😀</button>
+          <button type="button">😂</button>
+          <button type="button">😍</button>
+          <button type="button">🥹</button>
+          <button type="button">👍</button>
+          <button type="button">❤️</button>
+          <button type="button">🔥</button>
+          <button type="button">🎉</button>
+          <button type="button">🤝</button>
+          <button type="button">🚀</button>
+          <button type="button">😎</button>
+          <button type="button">💯</button>
+        </div>
+      </form>
+
+      <div class="composer-hint">
+        Enter — yuborish <span>·</span> KENZOX’da suhbatlar qulayroq
+      </div>
+    </main>
+
+    <aside class="details-panel" id="detailsPanel">
+      <div class="details-header">
+        <h3>Profil ma’lumoti</h3>
+        <button class="icon-btn" id="closeInfoBtn" type="button" aria-label="Panelni yopish">✕</button>
+      </div>
+
+      <div class="details-person">
+        <div class="avatar avatar-xl" id="detailsAvatar">K</div>
+        <h2 id="detailsName">Foydalanuvchi</h2>
+        <p id="detailsStatus">KENZOX foydalanuvchisi</p>
+      </div>
+
+      <div class="details-divider"></div>
+
+      <div class="detail-item">
+        <span class="detail-icon">＠</span>
+        <div>
+          <small>Username</small>
+          <strong id="detailsUsername">@username</strong>
+        </div>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-icon">✉</span>
+        <div>
+          <small>Holat</small>
+          <strong>KENZOX foydalanuvchisi</strong>
+        </div>
+      </div>
+
+      <div class="detail-buttons">
+        <button id="detailSearchBtn" type="button">Suhbatdan qidirish</button>
+        <button id="clearChatBtn" class="danger-btn" type="button">Suhbatni tozalash</button>
+      </div>
+
+      <p class="details-note">Profil va xabarlar KENZOX bazasidan yuklanadi.</p>
+    </aside>
+
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="modal-backdrop hidden" id="newChatModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Yangi suhbat</h2>
+        <button class="icon-btn" id="closeModalBtn" type="button" aria-label="Oynani yopish">✕</button>
+      </div>
+
+      <p>Qidirmoqchi bo‘lgan foydalanuvchining username’ini yozing.</p>
+
+      <form id="newChatForm">
+        <input
+          id="newChatName"
+          type="text"
+          maxlength="40"
+          placeholder="Masalan: user_a1b2c3d4"
+          autocomplete="off"
+          required
+        >
+
+        <button class="primary-btn" type="submit">Foydalanuvchini qidirish</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="./scrpit.js"></script>
+</body>
+</html>
