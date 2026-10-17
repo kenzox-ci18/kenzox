@@ -567,3 +567,32 @@ mark{background:#8870ff55;color:var(--text);border-radius:3px}
     max-width: 100%;
   }
 }
+
+@media (max-width: 620px) {
+  .search-wrap input,
+  .chat-search input,
+  .composer input,
+  .profile-field input,
+  .profile-field textarea,
+  .modal input,
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+    max-width: 100%;
+  }
+
+  .search-wrap input,
+  .chat-search input,
+  .composer input {
+    transform: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    transform: none;
+  }
+}
